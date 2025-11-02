@@ -5,6 +5,8 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     public float runSpeed = 8f; // YENİ: Koşma hızı
     public float jumpForce = 10f;
+
+    public float rayLength = 0.6f; // Yer kontrolü için ışın uzunluğu
     
     private Rigidbody2D rb;
     private Animator animator;
@@ -52,9 +54,30 @@ public class PlayerController : MonoBehaviour
     // Yer kontrolü metodu (aynı)
     bool IsGrounded()
     {
-        float rayLength = 0.6f;
-        Vector2 rayOrigin = transform.position;
-        RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.down, rayLength);
-        return hit.collider != null;
+        float rayLength = 0.7f;
+        LayerMask groundLayer = LayerMask.GetMask("Ground");
+        bool isGrounded = false;
+        
+        // 3 nokta: sol, orta, sağ
+        for (int i = -1; i <= 1; i++)
+        {
+            Vector2 rayOrigin = new Vector2(
+                transform.position.x + (i * 0.2f), 
+                transform.position.y - 0.5f
+            );
+            
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.down, rayLength, groundLayer);
+            if (hit.collider != null)
+            {
+                Debug.DrawRay(rayOrigin, Vector2.down * rayLength, Color.green);
+                isGrounded = true;
+            }
+            else
+            {
+                Debug.DrawRay(rayOrigin, Vector2.down * rayLength, Color.red);
+            }
+        }
+        
+        return isGrounded;
     }
 }
