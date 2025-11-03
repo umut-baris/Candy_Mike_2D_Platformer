@@ -47,8 +47,8 @@ Scenes/MainScene.unity dosyasını aç
 
 Play butonuna bas!
 
-**🚧 Geliştirme Durumu**
-**🟢 Aktif Geliştirme - Yeni özellikler ekleniyor!**
+** Geliştirme Durumu**
+** Aktif Geliştirme - Yeni özellikler ekleniyor!**
 
 **Planlanan Özellikler:**
 Yetenek ağacı sistemi
