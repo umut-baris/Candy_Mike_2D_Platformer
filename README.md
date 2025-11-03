@@ -29,7 +29,7 @@
 | `Left Shift` | Koşma |
 | `Space` | Zıplama |
 
-## 🔧 Kurulum
+## Kurulum
 
 1. **Repository'yi klonla:**
    ```bash
