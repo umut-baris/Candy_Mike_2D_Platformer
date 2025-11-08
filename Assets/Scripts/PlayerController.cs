@@ -72,7 +72,7 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = normalGravityScale;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // KOŞMA KONTROLÜ
         isRunning = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
