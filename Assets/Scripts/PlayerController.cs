@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
     
     private Rigidbody2D rb;
     private Animator animator;
-    private bool facingRight = true;
+    private SpriteRenderer spriteRenderer;
     private bool isRunning = false;
 
     private bool IsDash = false;
@@ -40,10 +40,7 @@ public class PlayerController : MonoBehaviour
     public AudioClip dashEndSound;
     private AudioSource audioSource;
 
- 
-
     public Camera mainCamera;
-
     private Vector3 originalCameraPos;
 
     // YENİ: Time Scale Effect
@@ -55,11 +52,18 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         audioSource = GetComponent<AudioSource>();
         
         // Eğer AudioSource yoksa ekle
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
+        
+        // Eğer SpriteRenderer yoksa uyar
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("SpriteRenderer component bulunamadı!");
+        }
         
         // Kamera referansı yoksa main camera'yı al
         if (mainCamera == null)
@@ -90,11 +94,15 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("IsWalking", Mathf.Abs(moveXForAnim) > 0.1f);
         animator.SetBool("IsRunning", isRunning && Mathf.Abs(moveXForAnim) > 0.1f);
 
-        // Yön kontrolü
-        if (moveXForAnim > 0.1f) facingRight = true;
-        if (moveXForAnim < -0.1f) facingRight = false;
-
-        animator.SetBool("FacingRight", facingRight);
+        // YENİ: Sprite flip kontrolü
+        if (moveXForAnim > 0.1f)
+        {
+            spriteRenderer.flipX = false;
+        }
+        else if (moveXForAnim < -0.1f)
+        {
+            spriteRenderer.flipX = true;
+        }
 
         // DASH KONTROLÜ
         if (Input.GetKeyDown(KeyCode.C) && availableHands > 0 && !IsDash)
@@ -156,11 +164,24 @@ public class PlayerController : MonoBehaviour
         {
             trailRenderer.sprite = playerRenderer.sprite;
             trailRenderer.flipX = playerRenderer.flipX;
-            trailRenderer.color = new Color(1f, 0.5f, 0.8f, 0.7f); // Mor-pembe dash rengi
+            trailRenderer.color = new Color(1f, 0.5f, 0.8f, 0.7f);
         }
         
         // 0.3 saniye sonra trail yok olsun
         Destroy(trail, 0.3f);
+    }
+
+    // YENİ: Particle sistemini flip etme
+    void FlipParticleSystem(ParticleSystem ps, bool flipX)
+    {
+        if (ps == null) return;
+        
+        var transform = ps.transform;
+        var scale = transform.localScale;
+        
+        // X scale'ini flip durumuna göre ayarla
+        scale.x = flipX ? -Mathf.Abs(scale.x) : Mathf.Abs(scale.x);
+        transform.localScale = scale;
     }
 
     // YENİ: Dash başlangıç efektleri
@@ -174,10 +195,11 @@ public class PlayerController : MonoBehaviour
         if (dashStartParticles != null)
         {
             dashStartParticles.transform.position = transform.position;
+            // YENİ: Particle sistemini flip et
+            FlipParticleSystem(dashStartParticles, spriteRenderer.flipX);
             dashStartParticles.Play();
         }
         
-  
         // Time scale efekti
         StartCoroutine(ChangeTimeScale(1f, dashTimeScale));
         
@@ -196,15 +218,14 @@ public class PlayerController : MonoBehaviour
         if (dashEndParticles != null)
         {
             dashEndParticles.transform.position = transform.position;
+            // YENİ: Particle sistemini flip et
+            FlipParticleSystem(dashEndParticles, spriteRenderer.flipX);
             dashEndParticles.Play();
         }
         
         // Time scale'i normale döndür
         StartCoroutine(ChangeTimeScale(dashTimeScale, 1f));
     }
-
-
-   
 
     // YENİ: Time scale efekti
     IEnumerator ChangeTimeScale(float from, float to)
@@ -264,7 +285,8 @@ public class PlayerController : MonoBehaviour
         IsDash = true;
         dashTimeLeft = dashDuration;
         
-        float dashDirection = facingRight ? 1f : -1f;
+        // YENİ: Flip durumuna göre dash yönü
+        float dashDirection = spriteRenderer.flipX ? -1f : 1f;
         rb.velocity = new Vector2(dashDirection * dashForce, rb.velocity.y);
 
         // Animasyon
