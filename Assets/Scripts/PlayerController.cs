@@ -65,12 +65,7 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("SpriteRenderer component bulunamadı!");
         }
         
-        // Kamera referansı yoksa main camera'yı al
-        if (mainCamera == null)
-            mainCamera = Camera.main;
-            
-        if (mainCamera != null)
-            originalCameraPos = mainCamera.transform.localPosition;
+
         
         // Başlangıç yerçekimini ayarla
         rb.gravityScale = normalGravityScale;
@@ -137,6 +132,11 @@ public class PlayerController : MonoBehaviour
         if (IsGrounded())
         {
             availableHands = 2;
+        }
+
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            rb.transform.position = new Vector3(0, 0, 0);
         }
     }
 
